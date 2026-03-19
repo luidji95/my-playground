@@ -2,87 +2,129 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  // PRIMER 1 - typeof operator
-  console.log(typeof "hello");        // "string"
-  console.log(typeof 42);             // "number"  
-  console.log(typeof true);            // "boolean"
-  console.log(typeof undefined);       // "undefined"
-  console.log(typeof null);            // "object" (poznati bag)
-  console.log(typeof {});              // "object"
-  console.log(typeof []);              // "object"
-  console.log(typeof function(){});    // "function"
-  ----------------------------------------
-  // PRIMER 2 - Falsy vrednosti
-  if (false) {}      // false
-  if (0) {}          // false
-  if (-0) {}         // false
-  if ("") {}         // false
-  if (null) {}       // false
-  if (undefined) {}  // false
-  if (NaN) {}        // false
+  // ===========================================
+  // 1. FUNKCIJE - TRI OBLIKA
+  // ===========================================
   
-  // Truthy primeri
-  if ("0") {         // true - string sa nulom
-    console.log("'0' je truthy!");
+  // 🔹 Funkcija deklaracija - hoistuje se
+  greet1(); // ✅ RADI - hoisting
+  function greet1() {
+    console.log("1. Funkcija deklaracija - moze se pozvati pre definicije");
   }
   
-  if ([]) {          // true - prazan niz
-    console.log("[] je truthy!");
+  // 🔹 Funkcija izraz (function expression) - NE hoistuje se
+  // greet2(); // ❌ ERROR - ne moze pre definicije
+  const greet2 = function() {
+    console.log("2. Function expression - ne moze pre definicije");
+  };
+  
+  // 🔹 Arrow funkcija - NE hoistuje se, nema svoj this
+  // greet3(); // ❌ ERROR - ne moze pre definicije
+  const greet3 = () => {
+    console.log("3. Arrow funkcija - kratka sintaksa, nema svoj this");
+  };
+  
+  // Pozovi ih posle definicije
+  greet1();
+  greet2(); 
+  greet3();
+  
+  // ===========================================
+  // 2. SCOPE (domet promenljivih)
+  // ===========================================
+  
+  // 🔹 Global scope
+  var globalVar = "Ja sam globalna (var)";
+  let globalLet = "Ja sam globalna (let)";
+  
+  function scopeExample() {
+    // 🔹 Funkcijski scope
+    var funkcijskaVar = "Samo u funkciji (var)";
+    let funkcijskaLet = "Samo u funkciji (let)";
+    
+    if (true) {
+      // 🔹 Blok scope
+      var varUBloku = "Var - izlazi iz bloka!"; // Var IGNORISE blok scope
+      let letUBloku = "Let - ostaje u bloku";   // Let postuje blok scope
+      console.log(letUBloku); // ✅ radi unutar bloka
+    }
+    
+    console.log(varUBloku); // ✅ radi - var ignorise blok
+    // console.log(letUBloku); // ❌ ERROR - van bloka
   }
   
-  if ({}) {          // true - prazan objekat
-    console.log("{} je truthy!");
+  scopeExample();
+  console.log(globalVar); // ✅ radi
+  console.log(globalLet); // ✅ radi
+  // console.log(funkcijskaVar); // ❌ ERROR - van funkcije
+  
+  // ===========================================
+  // 3. HOISTING i TDZ (Temporal Dead Zone)
+  // ===========================================
+  
+  // 🔹 Var hoisting
+  console.log("Var pre deklaracije:", varHoist); // undefined (hoistovano)
+  var varHoist = "Var je hoistovan kao undefined";
+  
+  // 🔹 Let/Const hoisting - TDZ
+  // console.log(letHoist); // ❌ ERROR - u TDZ
+  let letHoist = "Let je hoistovan ali u TDZ";
+  
+  // 🔹 Function hoisting
+  hoistMe(); // ✅ RADI - cela funkcija se hoistuje
+  function hoistMe() {
+    console.log("Funkcija deklaracija - cela se hoistuje");
   }
   
-  if (" ") {         // true - prazan string sa space-om
-    console.log("razmak je truthy!");
-  }
-  ----------------------------------------
-  // PRIMER 3 - Coercion (== vs ===)
-  console.log(0 == false);      // true (tipovi se konvertuju)
-  console.log(0 === false);     // false (razliciti tipovi)
+  // ===========================================
+  // 4. CLOSURE (zatvorenje)
+  // ===========================================
   
-  console.log("" == false);     // true
-  console.log("" === false);    // false
-  
-  console.log(null == undefined);  // true
-  console.log(null === undefined); // false
-  
-  // Zasto uvek koristiti ===
-  let x = "5";
-  if (x == 5) {
-    console.log("== kaze: jednaki su");   // Ovo ce se ispisati
+  function counter() {
+    let count = 0; // "Zatvorena" varijabla
+    
+    return function() {
+      count++; // I dalje ima pristup count
+      console.log("Trenutni broj:", count);
+      return count;
+    };
   }
   
-  if (x === 5) {
-    console.log("=== kaze: jednaki su");  // Ovo se nece ispisati
-  } else {
-    console.log("=== kaze: nisu jednaki"); // Ovo ce se ispisati
-  }
-  ----------------------------------------
-  // PRIMER 4 - Prakticni primer sa if-om
-  let userInput = "0";
+  const mojBrojac = counter(); // Pravimo instancu brojaca
+  mojBrojac(); // 1
+  mojBrojac(); // 2
+  mojBrojac(); // 3 - "zapamti" stanje
   
-  // LOSE - moze dovesti do bagova
-  if (userInput == false) {
-    console.log("Korisnik nije uneo nista");
+  // Jos jedan closure primer
+  function napraviPozdrav(ime) {
+    return function() {
+      console.log(`Zdravo, ${ime}!`); // Ime je "zarobljeno"
+    };
   }
   
-  // DOBRO - eksplicitna provera
-  if (userInput === "0") {
-    console.log("Korisnik je uneo 0 kao string");
-  }
+  const pozdravMilos = napraviPozdrav("Milos");
+  const pozdravPetar = napraviPozdrav("Petar");
   
-  // Provera da li je uneto nesto
-  if (userInput) {  // "0" je truthy, tako da ce uci
-    console.log("Korisnik je nesto uneo");
-  }
+  pozdravMilos(); // Zdravo, Milos!
+  pozdravPetar(); // Zdravo, Petar!
 
   return (
     <>
       <section className='my-plg'>
-        <h1>Tipovi, truthy/falsy i coercion!</h1>
-        {/* Otvori konzolu da vidis primere */}
+        <h1>Funkcije, Scope, Hoisting, Closure</h1>
+        <p> Otvori konzolu (F12) da vidiš primere!</p>
+        
+        <div className='lekcija'>
+          <h3> Ključne razlike:</h3>
+          <ul>
+            <li><strong>Funkcija deklaracija:</strong> Hoistuje se - može pre definicije</li>
+            <li><strong>Function expression:</strong> Ne hoistuje se - mora posle definicije</li>
+            <li><strong>Arrow funkcija:</strong> Nema svoj this, idealna za callback</li>
+            <li><strong>var:</strong> Funkcijski scope, hoistuje se kao undefined</li>
+            <li><strong>let/const:</strong> Blok scope, hoistuju se ali u TDZ</li>
+            <li><strong>Closure:</strong> Funkcija "pamti" scope u kome je kreirana</li>
+          </ul>
+        </div>
       </section>
     </>
   )
@@ -90,36 +132,67 @@ function App() {
 
 export default App
 
-/* 
+/*
 
-TYPEOF OPERATOR:
-- "string" → za stringove
-- "number" → za brojeve
-- "boolean" → za true/false
-- "undefined" → za undefined
-- "object" → za null (bag iz 90ih), objekte, nizove
-- "function" → za funkcije
+===========================================
+📚 SAŽETAK - FUNKCIJE, SCOPE, HOISTING, CLOSURE
+===========================================
 
-FALSY VREDNOSTI (samo 8):
-false, 0, -0, 0n (BigInt), "", null, undefined, NaN
+1. FUNKCIJE - TRI OBLIKA:
+------------------------
+🔹 DEKLARACIJA: function ime() {}
+   - Hoistuje se (moze pre definicije)
+   - Ima svoj this i arguments
 
-TRUTHY VREDNOSTI:
-Sve ostalo! Cak i "0", "false", [], {}, function(){}
+🔹 IZRAZ: const ime = function() {}
+   - Ne hoistuje se
+   - Ime nije dostupno pre definicije
 
-COERCION - == vs ===:
-
-LOOSE EQUALITY (==) → radi type coercion
-Primer: 0 == false → true (jer 0 → false)
-Primer: "" == false → true (jer "" → false)
-
-STRICT EQUALITY (===) → poredi i tip i vrednost
-Primer: 0 === false → false (number vs boolean)
-Primer: "" === false → false (string vs boolean)
+🔹 ARROW: const ime = () => {}
+   - Ne hoistuje se
+   - Nema svoj this (nasledjuje od okruzenja)
+   - Idealna za callback funkcije
 
 
-"Uvek koristim === osim kada eksplicitno zelim type coercion.
-To sprecava neocekivano ponasanje i cini kod predvidljivijim."
+2. SCOPE (Domet):
+----------------
+🌍 GLOBALNI: Van svih funkcija i blokova
+   - Dostupan svuda
+
+🏢 FUNKCIJSKI: Unutar function() {}
+   - var ima ovaj scope
+   - Dostupan samo unutar funkcije
+
+📦 BLOK SCOPE: Unutar {} (if, for, while)
+   - let i const imaju ovaj scope
+   - var IGNORISE blok scope!
 
 
+3. HOISTING:
+-----------
+📈 function deklaracija: CELA se hoistuje
+📈 var: Hoistuje se kao undefined
+📈 let/const: Hoistuju se ali su u TDZ
+   - TDZ = vreme od hoistovanja do deklaracije
+   - Pristup u TDZ baca ReferenceError
+
+
+4. CLOSURE:
+----------
+🔒 Funkcija "pamti" scope u kome je kreirana
+🔒 Omogucava privatne varijable
+🔒 Svaki poziv funkcije ima svoj "privatni" scope
+
+Primer: brojac koji pamti stanje
+Primer: funkcija koja "zarobi" parametar
+
+
+🟢 PRAKTICNA PRAVILA:
+---------------------
+✅ UVIEK koristi let/const umesto var
+✅ Arrow funkcije za kratke callback-e
+✅ Closure koristi za privatne podatke
+✅ let za promenljive koje se menjaju
+✅ const za promenljive koje se NE menjaju
 
 */
