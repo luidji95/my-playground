@@ -3,32 +3,28 @@ import './App.css';
 
 function App() {
 
-// Ovo već imaš – NE BRIŠEŠ!
-function fetchUser(id) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (id === 1) {
-                resolve({ id: 1, name: "Miloš" });
-            } else {
-                reject("Korisnik nije pronađen");
-            }
-        }, 1000);
-    });
-}
 
-// Ovo pišeš sad:
-async function getUserAsync(id) {
-    try {
-        const user = await fetchUser(id);  // 👈 fetchUser vraća Promise
-        console.log(user.name);
-    } catch (error) {
-        console.error(error);
+
+
+  function outer() {
+    let counter = 0;
+
+    return function inner(){
+      counter++;
+      console.log(counter);
     }
-}
 
-// Test:
-getUserAsync(1); // "Miloš"
-getUserAsync(2); // "Korisnik nije pronađen"
+    
+  }
+
+  const increment = outer();
+  increment();
+  increment();
+  increment();
+
+
+
+
 
 
 
